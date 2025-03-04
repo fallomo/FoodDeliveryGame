@@ -1,13 +1,21 @@
 "use client";
 import React, { useRef, useEffect } from 'react';
-import { TILE_TYPES } from "@/game/mapGenerater"
+import { Tile } from "@/game/types";
 
-const Map = ({ mapData }) => {
-  const canvasRef = useRef(null);
+// 定义 Map 组件的 props 类型
+interface MapProps {
+  mapData: Tile[][]; // mapData 是一个二维数组，每个元素是 Tile 类型
+}
+
+const Map: React.FC<MapProps> = ({ mapData }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
+    if (!canvas) return; // 如果 canvas 为 null，提前退出
+
     const ctx = canvas.getContext('2d');
+    if (!ctx) return; // 如果 ctx 为 null，提前退出
 
     // 清空画布
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -17,9 +25,9 @@ const Map = ({ mapData }) => {
     mapData.forEach((row, y) => {
       row.forEach((tile, x) => {
         // 根据格子类型绘制
-        if (tile.type === TILE_TYPES.ROAD) {
+        if (tile.type === 'road') {
           ctx.fillStyle = '#cccccc'; // 道路颜色
-        } else if (tile.type === TILE_TYPES.BUILDING) {
+        } else if (tile.type === 'building') {
           ctx.fillStyle = '#ffcc99'; // 建筑颜色
         } else {
           ctx.fillStyle = '#99cc99'; // 绿化颜色
@@ -27,7 +35,7 @@ const Map = ({ mapData }) => {
         ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
 
         // 绘制建筑名称
-        if (tile.type === TILE_TYPES.BUILDING) {
+        if (tile.type === 'building') {
           ctx.fillStyle = '#000000';
           ctx.font = '10px Arial';
           ctx.fillText(

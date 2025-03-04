@@ -1,34 +1,22 @@
 import React, { useRef, useEffect, useState } from 'react';
-
-// 地图格子类型
-export const TILE_TYPES = {
-  ROAD: 'road',
-  BUILDING: 'building',
-  GREEN: 'green',
-};
-
-// 建筑类型
-export const BUILDING_TYPES = [
-  'restaurant', // 餐饮店
-  'bookstore', // 书店
-  'cinema', // 音像店
-  'supermarket', // 超市
-  'pharmacy', // 药店
-];
+import { Tile, BuildingType } from '@/game/types';
 
 // 地图编辑器组件
-export const MapEditor = () => {
-  const canvasRef = useRef(null);
-  const [mapData, setMapData] = useState(
+const MapEditor: React.FC = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [mapData, setMapData] = useState<Tile[][]>(
     Array.from({ length: 20 }, () =>
-      Array.from({ length: 30 }, () => ({ type: TILE_TYPES.GREEN }))
+      Array.from({ length: 30 }, () => ({ type: 'green' }))
     )
   );
 
   // 渲染地图
   useEffect(() => {
     const canvas = canvasRef.current;
+    if (!canvas) return; // 如果 canvas 为 null，提前退出
+
     const ctx = canvas.getContext('2d');
+    if (!ctx) return; // 如果 ctx 为 null，提前退出
 
     // 清空画布
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -38,9 +26,9 @@ export const MapEditor = () => {
     mapData.forEach((row, y) => {
       row.forEach((tile, x) => {
         // 根据格子类型绘制
-        if (tile.type === TILE_TYPES.ROAD) {
+        if (tile.type === 'road') {
           ctx.fillStyle = '#cccccc'; // 道路颜色
-        } else if (tile.type === TILE_TYPES.BUILDING) {
+        } else if (tile.type === 'building') {
           ctx.fillStyle = '#ffcc99'; // 建筑颜色
         } else {
           ctx.fillStyle = '#99cc99'; // 绿化颜色
@@ -48,11 +36,11 @@ export const MapEditor = () => {
         ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
 
         // 绘制建筑名称
-        if (tile.type === TILE_TYPES.BUILDING) {
+        if (tile.type === 'building') {
           ctx.fillStyle = '#000000';
           ctx.font = '10px Arial';
           ctx.fillText(
-            tile.buildingType || 'building',
+            tile.buildingType,
             x * tileSize + 2,
             y * tileSize + 12
           );
@@ -62,8 +50,10 @@ export const MapEditor = () => {
   }, [mapData]);
 
   // 处理点击事件
-  const handleClick = (e) => {
+  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
+    if (!canvas) return; // 如果 canvas 为 null，提前退出
+
     const rect = canvas.getBoundingClientRect();
     const x = Math.floor((e.clientX - rect.left) / 20); // 计算点击的格子坐标
     const y = Math.floor((e.clientY - rect.top) / 20);
@@ -73,14 +63,17 @@ export const MapEditor = () => {
     const tile = newMapData[y][x];
 
     // 切换地块类型
-    if (tile.type === TILE_TYPES.GREEN) {
-      tile.type = TILE_TYPES.ROAD;
-    } else if (tile.type === TILE_TYPES.ROAD) {
-      tile.type = TILE_TYPES.BUILDING;
-      tile.buildingType = BUILDING_TYPES[Math.floor(Math.random() * BUILDING_TYPES.length)];
+    if (tile.type === 'green') {
+      newMapData[y][x] = { type: 'road' }; // 切换到道路
+    } else if (tile.type === 'road') {
+      newMapData[y][x] = {
+        type: 'building',
+        buildingType: Object.values(BuildingType)[
+          Math.floor(Math.random() * Object.values(BuildingType).length)
+        ], // 随机选择一个建筑类型
+      }; // 切换到建筑
     } else {
-      tile.type = TILE_TYPES.GREEN;
-      delete tile.buildingType;
+      newMapData[y][x] = { type: 'green' }; // 切换到绿化
     }
 
     setMapData(newMapData);
