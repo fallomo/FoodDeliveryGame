@@ -1,5 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Tile, BuildingType } from '@/game/types';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { DeliveryMan, initialDeliveryMan } from './deliveryMan';
+import { DeliveryManComponent } from './DeliveryManComponent';
+import { useKeyboardControl } from './useKeyboardControl';
 
 // 地图编辑器组件
 const MapEditor: React.FC = () => {
@@ -9,8 +13,10 @@ const MapEditor: React.FC = () => {
       Array.from({ length: 30 }, () => ({ type: 'green' }))
     )
   );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [deliveryMan, setDeliveryMan] = useKeyboardControl(initialDeliveryMan);
 
-  // 渲染地图
+  // 渲染地图和外卖员
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return; // 如果 canvas 为 null，提前退出
@@ -47,7 +53,18 @@ const MapEditor: React.FC = () => {
         }
       });
     });
-  }, [mapData]);
+
+    // 渲染外卖员
+    const DeliveryManRenderer = () => (
+      <DeliveryManComponent
+        deliveryMan={deliveryMan}
+        canvasContext={ctx}
+        tileSize={tileSize}
+      />
+    );
+    DeliveryManRenderer();
+  }, [mapData, deliveryMan]);
+
 
   // 处理点击事件
   const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {

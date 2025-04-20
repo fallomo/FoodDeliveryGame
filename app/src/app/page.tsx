@@ -1,11 +1,15 @@
 "use client"
-// import Map from "@/components/map";
-import  MapEditor from "@/game/mapGenerater";
+import Map from "@/components/map";
+import { Tile } from '@/game/types';
+import { defaultMap } from '@/data/mapData';
+import { useState } from 'react';
 
 export default function Home() {
+  const [mapData] = useState(defaultMap);
+
   return (
     <div>
-      <MapEditor></MapEditor>
+      <Map mapData={mapData as Tile[][]} />
     </div>
   );
 }
